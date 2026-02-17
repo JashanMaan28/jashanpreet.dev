@@ -1,0 +1,183 @@
+---
+title: "Building My Portfolio with Next.js 16 and Tailwind CSS v4"
+description: "A deep dive into how I built this portfolio site using Next.js 16, Tailwind CSS v4, Framer Motion, and a custom emerald design system."
+date: "2026-02-15"
+tags: ["next.js", "tailwind-css", "portfolio", "framer-motion"]
+category: "web-dev"
+published: true
+featured: true
+---
+
+## Why I Built a Custom Portfolio
+
+Every developer has a portfolio site, but I wanted mine to feel different. Not just another template — something that reflects how I think about design and engineering.
+
+I set out with a few goals:
+
+- **Performance first** — sub-second load times, minimal JS bundle
+- **Dark mode by default** — with a smooth toggle to light
+- **Subtle animations** — that enhance without distracting
+- **Accessible** — keyboard navigable, screen reader friendly
+
+## The Tech Stack
+
+Here's what powers this site:
+
+```tsx
+// The core dependencies
+const stack = {
+  framework: "Next.js 16",
+  styling: "Tailwind CSS v4",
+  animations: "Framer Motion",
+  icons: "Lucide React",
+  theme: "next-themes",
+  ui: "shadcn/ui",
+  language: "TypeScript",
+};
+```
+
+### Why Next.js 16?
+
+Next.js 16 brought significant improvements to the App Router. The new features I'm using:
+
+- **Route Groups** — `(home)` for the main page, separate layout for the blog
+- **Server Components** — most of the site renders on the server
+- **Metadata API** — SEO without the boilerplate
+
+### Tailwind CSS v4
+
+Tailwind v4 was a game-changer. The new CSS-first configuration means no more `tailwind.config.ts`:
+
+```css
+@theme inline {
+  --font-sans: var(--font-geist);
+  --font-heading: var(--font-syne);
+  --font-mono: var(--font-jetbrains-mono);
+}
+```
+
+Everything lives in `globals.css` using the `@theme` directive and CSS custom properties. This is cleaner and more maintainable than the old JavaScript config approach.
+
+## Design Decisions
+
+### The Emerald Color System
+
+I chose emerald green as the primary color because it stands out from the typical blue/purple developer portfolios. The color is defined using OKLCh:
+
+```css
+:root {
+  --primary: oklch(0.596 0.145 163);
+}
+
+.dark {
+  --primary: oklch(0.696 0.17 162);
+}
+```
+
+OKLCh provides perceptually uniform colors — the dark mode primary is genuinely brighter, not just numerically different.
+
+### Dot Grid Background
+
+The subtle dot grid background adds texture without being distracting:
+
+```css
+.dot-grid {
+  background-image: radial-gradient(
+    circle,
+    oklch(0.696 0.17 162 / 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+}
+```
+
+### Animated Border Effect
+
+One of my favorite details is the animated gradient border on hover:
+
+```css
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animated-border::after {
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 60%,
+    var(--primary) 88%,
+    oklch(0.765 0.177 163) 92%,
+    transparent 100%
+  );
+  animation: spin-border 3s linear infinite;
+}
+```
+
+This uses `@property` to animate a CSS custom property — something that wasn't possible with traditional CSS animations.
+
+## The Sidebar Navigation
+
+The sidebar uses an `IntersectionObserver` to track which section is in view:
+
+```tsx
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      }
+    },
+    { rootMargin: "-50% 0px -50% 0px" }
+  );
+
+  document.querySelectorAll("section[id]").forEach((s) => {
+    observer.observe(s);
+  });
+
+  return () => observer.disconnect();
+}, []);
+```
+
+The `rootMargin: "-50% 0px -50% 0px"` means a section is considered "active" when it's in the middle 50% of the viewport.
+
+## Performance Optimizations
+
+### Font Loading
+
+I use three Google Fonts with `next/font` for zero-layout-shift loading:
+
+```tsx
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const syne = Syne({ variable: "--font-syne", subsets: ["latin"] });
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
+```
+
+### Server Components
+
+Most components are React Server Components by default. Only interactive parts like the sidebar, theme toggle, and animations are client components.
+
+## What I Learned
+
+Building this portfolio taught me several things:
+
+1. **Tailwind v4 is production-ready** — the CSS-first approach is cleaner
+2. **Framer Motion + Server Components** need careful boundaries
+3. **OKLCh colors** make dark mode design much easier
+4. **Less is more** — subtle animations beat flashy ones
+
+## What's Next
+
+I'm planning to add:
+
+- A **blog section** (you're reading it!) with MDX support
+- **Project case studies** with detailed writeups
+- **Interactive demos** embedded in blog posts
+- **RSS feed** for subscribers
+
+Stay tuned for more posts about web development, physics, and the projects I'm building.

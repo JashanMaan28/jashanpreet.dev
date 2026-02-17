@@ -130,6 +130,13 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    background: oklch(0.596 0.145 163 / 0.3);
+    color: inherit;
+  }
+  .dark ::selection {
+    background: oklch(0.696 0.17 162 / 0.35);
+  }
 }
 
 /* ──────────────────────────────────────────
@@ -234,6 +241,22 @@ html {
 }
 
 /* ──────────────────────────────────────────
+   Progress border (Arc-style hover preview)
+   ────────────────────────────────────────── */
+.progress-border-ring {
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1.5px;
+  transition: opacity 0.2s ease;
+}
+
+/* ──────────────────────────────────────────
    Glow effects
    ────────────────────────────────────────── */
 .glow-sm {
@@ -289,4 +312,91 @@ html {
 }
 .animate-status-ping {
   animation: status-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ──────────────────────────────────────────
+   rehype-pretty-code syntax highlighting
+   ────────────────────────────────────────── */
+[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+[data-rehype-pretty-code-figure] code {
+  display: grid;
+  counter-reset: line;
+}
+
+[data-rehype-pretty-code-figure] code > [data-line] {
+  padding: 0 1rem;
+  border-left: 2px solid transparent;
+}
+
+[data-rehype-pretty-code-figure] code > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 1.25rem;
+  text-align: right;
+  color: oklch(0.5 0.01 270 / 0.3);
+  font-size: 0.8em;
+}
+
+[data-rehype-pretty-code-figure] [data-highlighted-line] {
+  background: oklch(0.696 0.17 162 / 0.08);
+  border-left-color: oklch(0.696 0.17 162);
+}
+
+[data-rehype-pretty-code-figure] [data-highlighted-chars] {
+  background: oklch(0.696 0.17 162 / 0.15);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.25rem;
+}
+
+[data-rehype-pretty-code-figure] code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  border-radius: 0 !important;
+}
+
+/* Inline code inside prose should NOT get rehype overrides */
+:not([data-rehype-pretty-code-figure]) > code {
+  font-size: 0.85em;
+}
+
+/* Code block backgrounds per theme */
+[data-rehype-pretty-code-figure] pre {
+  background: oklch(0.97 0.002 270) !important;
+}
+.dark [data-rehype-pretty-code-figure] pre {
+  background: oklch(0.1 0.015 280) !important;
+}
+
+/* Light mode: show light theme, hide dark */
+[data-rehype-pretty-code-figure] [data-theme="light"] {
+  display: block;
+}
+[data-rehype-pretty-code-figure] [data-theme="light"] span {
+  color: var(--shiki-light) !important;
+}
+[data-rehype-pretty-code-figure] [data-theme="dark"] {
+  display: none;
+}
+
+/* Dark mode: show dark theme, hide light */
+.dark [data-rehype-pretty-code-figure] [data-theme="dark"] {
+  display: block;
+}
+.dark [data-rehype-pretty-code-figure] [data-theme="dark"] span {
+  color: var(--shiki-dark) !important;
+}
+.dark [data-rehype-pretty-code-figure] [data-theme="light"] {
+  display: none;
 }

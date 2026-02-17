@@ -7,7 +7,7 @@ export function Footer() {
       <div className="mx-auto max-w-4xl px-6 py-8 md:px-12">
         <div className="flex flex-col items-center justify-between gap-3 text-xs text-muted-foreground/60 sm:flex-row">
           <span className="flex items-center gap-1.5">
-            Built by Jashanpreet Singh <Code2 className="h-3 w-3" /> 2025
+            <Code2 className="h-3 w-3" /> {new Date().getFullYear()} Jashanpreet Singh. All rights reserved.
           </span>
           <span className="font-mono text-[11px]">Next.js &middot; Tailwind CSS &middot; Framer Motion</span>
         </div>

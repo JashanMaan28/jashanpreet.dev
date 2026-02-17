@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Github, Linkedin, Mail, Menu, X,
-  User, Layers, FolderOpen, Clock, Send,
+  User, Layers, FolderOpen, Clock, Send, BookOpen,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Stack", id: "stack", icon: Layers },
   { label: "Projects", id: "projects", icon: FolderOpen },
   { label: "Experience", id: "experience", icon: Clock },
+  { label: "Writing", id: "blog", icon: BookOpen },
   { label: "Contact", id: "contact", icon: Send },
 ];
 

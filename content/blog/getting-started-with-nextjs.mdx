@@ -1,0 +1,297 @@
+---
+title: "Getting Started with Next.js: A Practical Guide"
+description: "Everything you need to know to start building with Next.js — from project setup to deployment, with real-world examples."
+date: "2026-02-10"
+tags: ["next.js", "react", "tutorial", "web-dev"]
+category: "tutorial"
+published: true
+featured: true
+---
+
+## What is Next.js?
+
+Next.js is a React framework that gives you the best developer experience with all the features you need for production. It handles routing, rendering, data fetching, and bundling out of the box.
+
+If you're coming from plain React (Create React App or Vite), Next.js adds:
+
+- **File-based routing** — no need for React Router
+- **Server-side rendering** — better SEO and initial load performance
+- **API routes** — build your backend in the same project
+- **Image optimization** — automatic resizing and format conversion
+- **Built-in TypeScript** — zero-config setup
+
+## Setting Up Your First Project
+
+Getting started is straightforward:
+
+```bash
+bunx create-next-app@latest my-app
+cd my-app
+bun dev
+```
+
+You'll be asked a few questions. Here's what I recommend:
+
+```
+Would you like to use TypeScript? Yes
+Would you like to use ESLint? Yes
+Would you like to use Tailwind CSS? Yes
+Would you like to use `src/` directory? No
+Would you like to use App Router? Yes
+Would you like to customize the default import alias? Yes (@/*)
+```
+
+## Understanding the App Router
+
+The App Router is Next.js's modern routing system. Every folder in `app/` becomes a route:
+
+```
+app/
+  page.tsx          → /
+  about/
+    page.tsx        → /about
+  blog/
+    page.tsx        → /blog
+    [slug]/
+      page.tsx      → /blog/any-post-slug
+```
+
+### Layouts
+
+Layouts wrap pages and persist across navigation:
+
+```tsx
+// app/layout.tsx — wraps every page
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+### Route Groups
+
+Route groups let you organize routes without affecting the URL structure:
+
+```
+app/
+  (marketing)/
+    page.tsx        → /
+    about/page.tsx  → /about
+  (dashboard)/
+    settings/page.tsx → /settings
+```
+
+The parentheses mean the folder name is NOT part of the URL.
+
+## Server vs Client Components
+
+This is the biggest concept to understand in modern Next.js.
+
+### Server Components (Default)
+
+Every component is a Server Component by default. They:
+
+- Run only on the server
+- Can directly access databases, file systems, etc.
+- Don't increase your JavaScript bundle
+- Cannot use hooks (`useState`, `useEffect`, etc.)
+
+```tsx
+// This is a Server Component (no "use client" directive)
+async function UserProfile({ id }: { id: string }) {
+  const user = await db.user.findUnique({ where: { id } });
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.bio}</p>
+    </div>
+  );
+}
+```
+
+### Client Components
+
+Add `"use client"` at the top when you need interactivity:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Count: {count}
+    </button>
+  );
+}
+```
+
+### The Rule of Thumb
+
+> Keep components on the server by default. Only add `"use client"` when you need browser APIs, event handlers, or React hooks.
+
+## Data Fetching
+
+In the App Router, data fetching happens directly in components using `async`/`await`:
+
+```tsx
+async function BlogPage() {
+  const posts = await fetch("https://api.example.com/posts", {
+    next: { revalidate: 3600 }, // revalidate every hour
+  }).then((res) => res.json());
+
+  return (
+    <ul>
+      {posts.map((post: { id: string; title: string }) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Static vs Dynamic Rendering
+
+- **Static** — rendered at build time, cached, fast (default)
+- **Dynamic** — rendered on every request
+
+Next.js automatically chooses based on your data fetching:
+
+```tsx
+// Static — no dynamic data
+async function AboutPage() {
+  return <h1>About Us</h1>;
+}
+
+// Dynamic — uses cookies, headers, or search params
+import { cookies } from "next/headers";
+
+async function DashboardPage() {
+  const session = (await cookies()).get("session");
+  return <h1>Welcome back</h1>;
+}
+```
+
+## Styling with Tailwind CSS
+
+Tailwind CSS is the recommended styling solution for Next.js. With v4, setup is even simpler:
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: oklch(0.696 0.17 162);
+}
+```
+
+Then use utility classes directly:
+
+```tsx
+export function Card({ title, description }: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-6">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {description}
+      </p>
+    </div>
+  );
+}
+```
+
+## Deployment
+
+The easiest way to deploy a Next.js app is with Vercel:
+
+```bash
+bun install -g vercel
+vercel
+```
+
+But you can also deploy to:
+
+- **Cloudflare Pages** — edge rendering
+- **AWS Amplify** — full AWS integration
+- **Docker** — self-hosted anywhere
+
+## Common Patterns
+
+### Loading States
+
+```tsx
+// app/blog/loading.tsx
+export default function Loading() {
+  return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-8 w-3/4 rounded bg-muted" />
+      <div className="h-4 w-1/2 rounded bg-muted" />
+    </div>
+  );
+}
+```
+
+### Error Handling
+
+```tsx
+// app/blog/error.tsx
+"use client";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <h2>Something went wrong</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+```
+
+### Metadata
+
+```tsx
+// app/blog/[slug]/page.tsx
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const post = await getPost(params.slug);
+  return {
+    title: post.title,
+    description: post.description,
+  };
+}
+```
+
+## Resources
+
+Here are the best places to learn more:
+
+- [Next.js Documentation](https://nextjs.org/docs) — the official docs
+- [Next.js Learn Course](https://nextjs.org/learn) — interactive tutorial
+- [Vercel Templates](https://vercel.com/templates/next.js) — starter projects
+
+Next.js has a steep learning curve at first, but once the mental model clicks, it becomes incredibly productive. Start with a simple project, get comfortable with Server Components, and build from there.
